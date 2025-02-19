@@ -1,0 +1,58 @@
+import logging
+import asyncio
+from datetime import datetime
+from aiogram import Bot, Dispatcher, types
+from aiogram.filters import Command
+
+# Логирование
+logging.basicConfig(level=logging.INFO)
+
+# Настройки бота
+TOKEN = "8163172164:AAFzBH3-_oTN4COUJUgwfpS2XaRBr83aMzE"
+GROUP_CHAT_ID = -4617305421  # Ваш ID закрытой группы
+WORK_START = 9  # Начало рабочего времени
+WORK_END = 18    # Конец рабочего времени
+
+bot = Bot(token=TOKEN)
+dp = Dispatcher()
+
+# Обработчик команды /start
+@dp.message(Command("start"))
+async def start_command_handler(message: types.Message):
+    await message.answer("Привет! Я ваш помощник. Чем могу помочь? Задайте ваш вопрос, и я передам его дальше.")
+
+# Переменная для хранения вопросов пользователя
+user_question_type = {}
+
+# Обработчик текстовых сообщений (вопросов)
+@dp.message()
+async def handle_question(message: types.Message):
+    user_id = message.from_user.id
+    question_text = message.text
+
+    # Проверка рабочего времени
+    current_hour = datetime.now().hour
+    if WORK_START <= current_hour < WORK_END:
+        status = "в рабочее время"
+    else:
+        status = "в нерабочее время. Мы ответим на ваш вопрос на следующий рабочий день."
+
+    # Пересылка вопроса в Telegram-группу
+    try:
+        await forward_to_group(f"Вопрос от {message.from_user.full_name} ({message.from_user.id})\nСообщение: {question_text}\n\nСтатус: {status}")
+        await message.answer("Ваш вопрос отправлен. Спасибо! Мы скоро вам ответим.")
+    except Exception as e:
+        logging.error(f"Ошибка при пересылке сообщения: {e}")
+        await message.answer("Произошла ошибка при отправке вашего вопроса. Попробуйте позже.")
+
+# Функция пересылки вопроса в группу
+async def forward_to_group(message_text):
+    await bot.send_message(chat_id=GROUP_CHAT_ID, text=message_text)
+
+# Запуск бота
+async def main():
+    print("Общительный бот запущен")
+    await dp.start_polling(bot)
+
+if __name__ == "__main__":
+    asyncio.run(main())

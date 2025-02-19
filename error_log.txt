@@ -1,0 +1,4 @@
+DEBUG:asyncio:Using proactor: IocpProactor
+INFO:aiogram.dispatcher:Start polling
+INFO:aiogram.dispatcher:Run polling for bot @HR_DI_DALL_E_bot id=7558730596 - 'HR-DI-DALL-E'
+INFO:aiogram.event:Update id=560851144 is handled. Duration 390 ms by bot id=7558730596
